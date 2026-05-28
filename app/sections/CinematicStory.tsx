@@ -1,7 +1,7 @@
 "use client"
 
 import Image from "next/image"
-import { motion, useScroll, useTransform } from "framer-motion"
+import { motion, type MotionValue, useScroll, useTransform } from "framer-motion"
 import { useRef } from "react"
 import { RainOverlay } from "../components/RainOverlay"
 import { Vignette } from "../components/Vignette"
@@ -228,51 +228,88 @@ function HowItBegan() {
   )
 }
 
+function FragmentMoment({
+  line,
+  className,
+  index,
+  total,
+  progress,
+}: {
+  line: string
+  className?: string
+  index: number
+  total: number
+  progress: MotionValue<number>
+}) {
+  const step = 1 / total
+  const center = index * step + step / 2
+  const start = Math.max(0, center - step * 0.72)
+  const holdStart = Math.max(0, center - step * 0.16)
+  const holdEnd = Math.min(1, center + step * 0.16)
+  const end = Math.min(1, center + step * 0.72)
+  const opacity = useTransform(progress, [start, holdStart, holdEnd, end], [0, 1, 1, 0])
+  const y = useTransform(progress, [start, holdStart, holdEnd, end], [44, 0, 0, -44])
+  const blur = useTransform(progress, [start, holdStart, holdEnd, end], ["blur(12px)", "blur(0px)", "blur(0px)", "blur(12px)"])
+
+  return (
+    <motion.p
+      className={`absolute left-0 top-1/2 max-w-3xl -translate-y-1/2 font-serif text-4xl font-light italic leading-tight text-paper sm:text-5xl md:text-6xl lg:text-7xl ${className ?? ""}`}
+      style={{ opacity, y, filter: blur }}
+    >
+      {line}
+    </motion.p>
+  )
+}
+
 function Fragments() {
   const ref = useRef<HTMLElement>(null)
   const { scrollYProgress } = useScroll({
     target: ref,
-    offset: ["start end", "end start"],
+    offset: ["start start", "end end"],
   })
-  const backgroundY = useTransform(scrollYProgress, [0, 1], [100, -120])
+  const backgroundY = useTransform(scrollYProgress, [0, 1], [45, -45])
+  const backgroundScale = useTransform(scrollYProgress, [0, 1], [1.08, 1])
+  const introOpacity = useTransform(scrollYProgress, [0, 0.1, 0.24], [1, 1, 0.38])
+  const introY = useTransform(scrollYProgress, [0, 0.24], [0, -18])
 
   return (
-    <section ref={ref} className="relative min-h-[170vh] overflow-hidden bg-[#070a1b] px-6 py-32 sm:px-10 md:px-16 lg:px-24">
-      <motion.div className="absolute inset-0 opacity-35" style={{ y: backgroundY }}>
-        <Image
-          src="/images/empire-state.png"
-          alt="Distant city lights at night"
-          fill
-          sizes="100vw"
-          className="object-cover"
-          quality={90}
-          unoptimized
-        />
-      </motion.div>
-      <div className="absolute inset-0 bg-gradient-to-b from-midnight via-midnight/82 to-midnight" />
-      <RainOverlay intensity="light" />
+    <section ref={ref} className="relative h-[430svh] overflow-visible bg-[#070a1b]">
+      <div className="sticky top-0 h-screen overflow-hidden px-6 py-24 sm:px-10 md:px-16 lg:px-24">
+        <motion.div className="absolute inset-0 opacity-70" style={{ y: backgroundY, scale: backgroundScale }}>
+          <Image
+            src="/images/midnight-thoughts.png"
+            alt="A quiet midnight writing scene behind the poetry fragments"
+            fill
+            sizes="100vw"
+            className="object-cover brightness-[0.78] saturate-[0.9]"
+            quality={92}
+            unoptimized
+          />
+        </motion.div>
+        <div className="absolute inset-0 bg-gradient-to-b from-midnight/80 via-midnight/58 to-midnight/84" />
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_70%_44%,rgba(35,58,117,0.08),transparent_34%),radial-gradient(circle_at_22%_76%,rgba(229,154,92,0.12),transparent_32%)]" />
+        <RainOverlay intensity="light" />
 
-      <div className="relative z-10 mx-auto max-w-7xl">
-        <ChapterLabel>Chapter 3 — Fragments</ChapterLabel>
-        <SoftReveal>
-          <p className="mt-7 max-w-2xl font-sans text-base font-light leading-8 text-paper/56">
-            The book moves in small flashes: a look, a room, a remembered sentence, a love that still has weather.
-          </p>
-        </SoftReveal>
+        <div className="relative z-10 mx-auto h-full max-w-7xl">
+          <motion.div style={{ opacity: introOpacity, y: introY }}>
+            <ChapterLabel>Chapter 3 — Fragments</ChapterLabel>
+            <p className="mt-7 max-w-2xl font-sans text-base font-light leading-8 text-paper/56">
+              The book moves in small flashes: a look, a room, a remembered sentence, a love that still has weather.
+            </p>
+          </motion.div>
 
-        <div className="mt-28 space-y-44 md:mt-36 md:space-y-56">
-          {fragments.map((fragment, index) => (
-            <motion.p
-              key={fragment.line}
-              className={`max-w-2xl font-serif text-4xl font-light italic leading-tight text-paper sm:text-5xl md:text-6xl ${fragment.className}`}
-              initial={{ opacity: 0, y: 70, filter: "blur(10px)" }}
-              whileInView={{ opacity: 1, y: 0, filter: "blur(0px)" }}
-              viewport={{ once: false, margin: "-22%" }}
-              transition={{ duration: 1.35, delay: index % 2 ? 0.08 : 0, ease: [0.22, 1, 0.36, 1] }}
-            >
-              {fragment.line}
-            </motion.p>
-          ))}
+          <div className="absolute inset-x-0 bottom-20 top-40 md:bottom-24 md:top-44">
+            {fragments.map((fragment, index) => (
+              <FragmentMoment
+                key={fragment.line}
+                line={fragment.line}
+                className={fragment.className}
+                index={index}
+                total={fragments.length}
+                progress={scrollYProgress}
+              />
+            ))}
+          </div>
         </div>
       </div>
     </section>
