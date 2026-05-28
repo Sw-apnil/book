@@ -462,14 +462,24 @@ function Closing() {
         />
       </div>
       <div className="absolute inset-0 bg-gradient-to-b from-[#120d1b] via-midnight/90 to-[#070a1b]" />
-      <div className="relative z-10 mx-auto flex max-w-7xl flex-col gap-10 border-t border-paper/10 pt-10 md:flex-row md:items-end md:justify-between">
+      <div className="relative z-10 mx-auto flex max-w-7xl flex-col gap-8 border-t border-paper/10 pt-10 md:flex-row md:items-start md:justify-between">
         <div>
           <p className="font-serif text-3xl font-light text-paper md:text-4xl">I Wrote You Like A Love Letter</p>
           <p className="mt-3 font-sans text-sm font-light text-paper/48">Nisha</p>
         </div>
-        <p className="max-w-sm font-sans text-sm font-light leading-7 text-paper/46 md:text-right">
-          Some books do not end. They just lower their voice.
-        </p>
+        <div className="max-w-sm pt-2 font-sans font-light md:text-right">
+          <p className="text-sm leading-7 text-paper/46">
+            Some books do not end. They just lower their voice.
+          </p>
+          <a
+            href="https://www.instagram.com/its.nisha25"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="mt-4 inline-flex text-[11px] uppercase tracking-[0.24em] text-amber/70 transition duration-500 hover:text-amber"
+          >
+            Instagram
+          </a>
+        </div>
       </div>
     </footer>
   )
